@@ -3,6 +3,9 @@
 
 import queue
 import subprocess
+from typing import Optional
+
+from playwright.sync_api import sync_playwright
 
 import sounddevice as sd
 from vosk import Model, KaldiRecognizer
@@ -43,16 +46,31 @@ recognizer.SetWords(False)
 
 print("===> Begin recording. Press Ctrl+C to stop the recording ")
 
-
 def open_browser(web_pages: list[str]):
-    web_page = web_pages[0]
+    web_page_name = web_pages[0]
+    web_page_url = extract_web_page(web_page_name)
+    if web_page_url is not None:
+        with sync_playwright() as p:
+            print(f"open {web_page_url}")
+            browser = p.firefox.launch(headless=False)
+            print(f"browser {browser}")
+            page = browser.new_page()
+            print(f"page {page}")
+            page.goto(web_page_url)
+            page.wait_for_timeout(100000)
+            #browser.close()
+    else:
+        print(f"web page not recognized: {web_page_name}")
+
+
+def extract_web_page(web_page: str) -> Optional[str]:
     match web_page:
         case "repubblica" | "republican":
-            subprocess.run(["xdg-open",  "https://www.repubblica.it"])
+            return "https://www.repubblica.it"
         case "netflix":
-            subprocess.run(["xdg-open",  "https://www.netflix.com"])
+            return "https://www.netflix.com"
         case _:
-            print(f"web page not recognized: {web_page}")
+            return None
 
 
 def in_netflix(action: list[str]):
@@ -60,24 +78,30 @@ def in_netflix(action: list[str]):
 
 
 def do_something(command_words: list[str]):
-    match command_words[0]:
-        case "browser":
-            open_browser(command_words[1:])
-        case "netflix":
-            in_netflix(command_words[1:])
-        case _:
-            print(f"Command {command_words} not recognized")
+    if len(command_words) > 0:
+        match command_words[0]:
+            case "browser":
+                open_browser(command_words[1:])
+            case "netflix":
+                in_netflix(command_words[1:])
+            case _:
+                print(f"Command {command_words} not recognized")
+    else:
+        print("No command to run")
 
 
 def do_something_if_requested(words: list[str]):
     words = [w for w in words if w not in   ["a", "and", "but"]]
-    first_word = words[0]
-    if first_word == "max"  and len(words) >= 2:
-        do_something(words[1:])
-    elif first_word == "hi" and len(words) >= 3:
-        do_something_if_requested(words[1:])
+    if len(words) > 0:
+        first_word = words[0]
+        if first_word == "max"  and len(words) >= 2:
+            do_something(words[1:])
+        elif first_word == "hi" and len(words) >= 3:
+            do_something_if_requested(words[1:])
+        else:
+            print("Not a command")
     else:
-        print("Not a command")
+        print("Nothing to do")
 
 
 try:
