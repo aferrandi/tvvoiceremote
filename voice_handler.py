@@ -2,6 +2,8 @@
 # !/usr/bin/env python3
 
 import queue
+import subprocess
+
 import sounddevice as sd
 from vosk import Model, KaldiRecognizer
 import sys
@@ -40,18 +42,56 @@ recognizer = KaldiRecognizer(model, samplerate)
 recognizer.SetWords(False)
 
 print("===> Begin recording. Press Ctrl+C to stop the recording ")
-try:
-    with sd.RawInputStream(dtype='int16',
 
-                           callback=recordCallback):
+
+def open_browser(web_pages: list[str]):
+    web_page = web_pages[0]
+    match web_page:
+        case "repubblica" | "republican":
+            subprocess.run(["xdg-open",  "https://www.repubblica.it"])
+        case "netflix":
+            subprocess.run(["xdg-open",  "https://www.netflix.com"])
+        case _:
+            print(f"web page not recognized: {web_page}")
+
+
+def in_netflix(action: list[str]):
+    pass
+
+
+def do_something(command_words: list[str]):
+    match command_words[0]:
+        case "browser":
+            open_browser(command_words[1:])
+        case "netflix":
+            in_netflix(command_words[1:])
+        case _:
+            print(f"Command {command_words} not recognized")
+
+
+def do_something_if_requested(words: list[str]):
+    words = [w for w in words if w not in   ["a", "and", "but"]]
+    first_word = words[0]
+    if first_word == "max"  and len(words) >= 2:
+        do_something(words[1:])
+    elif first_word == "hi" and len(words) >= 3:
+        do_something_if_requested(words[1:])
+    else:
+        print("Not a command")
+
+
+try:
+    with sd.RawInputStream(dtype='int16', callback=recordCallback):
         while True:
             data = q.get()
             if recognizer.AcceptWaveform(data):
-                recognizerResult = recognizer.Result()
+                result_text = recognizer.Result()
                 # convert the recognizerResult string into a dictionary
-                resultDict = json.loads(recognizerResult)
-                if not resultDict.get("text", "") == "":
-                    print(recognizerResult)
+                result_dict = json.loads(result_text)
+                text = result_dict.get("text", "")
+                if text != "":
+                    print(f"Text from microphone: {text}")
+                    do_something_if_requested(text.split(" "))
                 else:
                     print("no input sound")
 
