@@ -5,104 +5,122 @@ import json
 import queue
 import re
 import sys
-from typing import Optional, Any
+from dataclasses import dataclass
+from typing import Optional, Any, Self
 
 import sounddevice as sd
 from _cffi_backend import buffer
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Page, Playwright, Locator
 from vosk import Model, KaldiRecognizer
+from thefuzz import fuzz
+
+@dataclass(frozen=True)
+class WordWithMatchProbability:
+    locator: Locator
+    text: str
+    match_probability: float
 
 
+class BrowserHandler:
+    def __init__(self, page: Page, playwright: Playwright) -> None:
+        self.page: Page = page
+        self.playwright = playwright
 
-
-def open_browser(web_pages: list[str]):
-    web_page_name = web_pages[0]
-    web_page_url = extract_web_page(web_page_name)
-    if web_page_url is not None:
-        with sync_playwright() as p:
+    @classmethod
+    def open_browser(cls, web_pages: list[str]) -> Self:
+        web_page_name = web_pages[0]
+        web_page_url = cls.extract_web_page(web_page_name)
+        if web_page_url is not None:
+            p = sync_playwright().start()
             print(f"open {web_page_url}")
-            browser = p.chromium.launch(headless=False)
+            browser = p.chromium.launch_persistent_context("./user_data", headless=False)
             print(f"browser {browser}")
-            page = browser.new_page()
+            page = browser.pages[0]
             print(f"page {page}")
             page.goto(web_page_url)
-            try:
-                page.wait_for_timeout(100000)
-            except:
-                print("Browser closed")
-            #browser.close()
-    else:
-        print(f"web page not recognized: {web_page_name}")
-
-
-def extract_web_page(web_page: str) -> Optional[str]:
-    match web_page:
-        case "repubblica" | "republican":
-            return "https://www.repubblica.it"
-        case "netflix":
-            return "https://www.netflix.com"
-        case _:
+            browser_handler = BrowserHandler(page, p)
+            # page.pause()
+            # try:
+            #     page.wait_for_timeout(100000)
+            # except:
+            #     print("Browser closed")
+            return browser_handler
+        else:
+            print(f"web page not recognized: {web_page_name}")
             return None
 
 
-def in_netflix(action: list[str]) -> None:
-    with sync_playwright() as p:
-        try:
-            # Connect to a running Chrome instance via CDP
-            browser = p.chromium.connect("http://localhost:9222")  # Replace 9222 with the actual debugging port
-            default_context = browser.contexts[0]
-            page = default_context.pages[0]  # Get the first page in the context
-            if "netflix" in page.url:
-                title = action[0]
-                regex = re.compile(f".*{title}.*", re.IGNORECASE)
-                anchor = page.get_by_role('link').get_by_label(regex)
-                print(f"Netflix click {anchor}")
-                anchor.click()
-                print(f"clicked on {title}")
-            else:
-                print(f"The page is not netflix but {page.title()}")
-        except Exception as e:
-            print(f"Executing netflix command {action} got {e}")
-
-
-def do_something(command_words: list[str]) -> None:
-    if len(command_words) > 0:
-        match command_words[0]:
-            case "browser":
-                open_browser(command_words[1:])
+    @classmethod
+    def extract_web_page(cls, web_page: str) -> Optional[str]:
+        match web_page:
+            case "repubblica" | "republican":
+                return "https://www.repubblica.it"
             case "netflix":
-                in_netflix(command_words[1:])
+                return "https://www.netflix.com"
             case _:
-                print(f"Command {command_words} not recognized")
-    else:
-        print("No command to run")
+                return None
 
 
-def do_something_if_requested(words: list[str]) -> None:
-    words = [w for w in words if w not in   ["a", "and", "but"]]
-    if len(words) > 0:
-        first_word = words[0]
-        if first_word == "max"  and len(words) >= 2:
-            do_something(words[1:])
-        elif first_word == "hi" and len(words) >= 3:
-            do_something_if_requested(words[1:])
+    def in_netflix(self, action: list[str]) -> None:
+        if "netflix" in self.page.url:
+            title = action[0]
+            regex = re.compile(f".*{title}.*", re.IGNORECASE)
+            lst = self.page.get_by_role('link')
+            locators_with_probabilities = [WordWithMatchProbability(el, el.text_content(), fuzz.ratio(title, el.text_content())) for el in lst.all()]
+            closest = max(locators_with_probabilities, key=lambda item: item.match_probability)
+            print(f"Netflix click {closest}")
+            closest.locator.click()
+            print(f"clicked on {title}")
         else:
-            print(f"Not a command: {words}")
-    else:
-        print("No command, nothing to do")
+            print(f"The page is not netflix but {self.page.title()}")
 
 
-def read_from_microphone(recognizer: KaldiRecognizer, data: Any) -> None:
-    if recognizer.AcceptWaveform(data):
-        result_text = recognizer.Result()
-        # convert the recognizerResult string into a dictionary
-        result_dict = json.loads(result_text)
-        text = result_dict.get("text", "")
-        if text != "":
-            print(f"Text from microphone: {text}")
-            do_something_if_requested(text.split(" "))
+class MicrophoneHandler:
+    def __init__(self) -> None:
+        self.browser_handler: Optional[BrowserHandler] = None
+
+    def do_something(self, command_words: list[str]) -> None:
+        if len(command_words) > 0:
+            match command_words[0]:
+                case "browser":
+                    self.browser_handler = BrowserHandler.open_browser(command_words[1:])
+                    print(f"Crated browser handler {self.browser_handler}")
+                case "netflix":
+                    if self.browser_handler is not None:
+                        self.browser_handler.in_netflix(command_words[1:])
+                    else:
+                        print("No open browser")
+                case _:
+                    print(f"Command {command_words} not recognized")
         else:
-            print("no input sound")
+            print("No command to run")
+
+
+    def do_something_if_requested(self, words: list[str]) -> None:
+        words = [w for w in words if w not in   ["a", "and", "but"]]
+        if len(words) > 0:
+            first_word = words[0]
+            if first_word == "max"  and len(words) >= 2:
+                self.do_something(words[1:])
+            elif first_word == "hi" and len(words) >= 3:
+                self.do_something_if_requested(words[1:])
+            else:
+                print(f"Not a command: {words}")
+        else:
+            print("No command, nothing to do")
+
+
+    def read_from_microphone(self, recognizer: KaldiRecognizer, data: Any) -> None:
+        if recognizer.AcceptWaveform(data):
+            result_text = recognizer.Result()
+            # convert the recognizerResult string into a dictionary
+            result_dict = json.loads(result_text)
+            text = result_dict.get("text", "")
+            if text != "":
+                print(f"Text from microphone: {text}")
+                self.do_something_if_requested(text.split(" "))
+            else:
+                print("no input sound")
 
 def init_recognizer() -> KaldiRecognizer:
     # list all audio devices known to your system
@@ -134,11 +152,12 @@ class RecordCallbackHandler:
 def recording_loop(q: queue.Queue[Any], recognizer: KaldiRecognizer):
     print("===> Begin recording. Press Ctrl+C to stop the recording ")
     callback_handler = RecordCallbackHandler(q)
+    microphone_handler = MicrophoneHandler()
     try:
         with sd.RawInputStream(dtype='int16', callback=callback_handler.recordCallback):
             while True:
                 data = q.get()
-                read_from_microphone(recognizer, data)
+                microphone_handler.read_from_microphone(recognizer, data)
     except KeyboardInterrupt:
         print('===> Finished Recording')
     except Exception as e:
