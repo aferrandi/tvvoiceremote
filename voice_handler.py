@@ -5,6 +5,7 @@ import json
 import queue
 import re
 import sys
+import traceback
 from dataclasses import dataclass
 from typing import Optional, Any, Self
 
@@ -64,15 +65,28 @@ class BrowserHandler:
     def in_netflix(self, action: list[str]) -> None:
         if "netflix" in self.page.url:
             title = action[0]
-            regex = re.compile(f".*{title}.*", re.IGNORECASE)
-            lst = self.page.get_by_role('link')
-            locators_with_probabilities = [WordWithMatchProbability(el, el.text_content(), fuzz.ratio(title, el.text_content())) for el in lst.all()]
-            closest = max(locators_with_probabilities, key=lambda item: item.match_probability)
-            print(f"Netflix click {closest}")
-            closest.locator.click()
-            print(f"clicked on {title}")
+            match title:
+                case "close":
+                    print("Close movie")
+                    self.page.get_by_role("dialog").get_by_role("button").locator('[data-uia="previewModal-closebtn"]:scope').click()
+                case "start":
+                    print("Start movie")
+                    self.page.get_by_role("dialog").get_by_role("link").locator('[data-uia="play-button"]:scope').click()
+                case _:
+                    self.in_netflix_movie_with_title(title)
         else:
             print(f"The page is not netflix but {self.page.title()}")
+
+    def in_netflix_movie_with_title(self, title: str) -> None:
+        lst = self.page.get_by_role('link')
+        locators_with_probabilities = [self.build_word_with_match_probability(el, title) for el in lst.all()]
+        closest = max(locators_with_probabilities, key=lambda item: item.match_probability)
+        print(f"Netflix click {closest}")
+        closest.locator.click()
+        print(f"clicked on {title}")
+
+    def build_word_with_match_probability(self, el: Locator, title: str) -> WordWithMatchProbability:
+        return WordWithMatchProbability(el, el.text_content(), fuzz.ratio(title, el.text_content()))
 
 
 class MicrophoneHandler:
@@ -81,17 +95,26 @@ class MicrophoneHandler:
 
     def do_something(self, command_words: list[str]) -> None:
         if len(command_words) > 0:
-            match command_words[0]:
-                case "browser":
-                    self.browser_handler = BrowserHandler.open_browser(command_words[1:])
-                    print(f"Crated browser handler {self.browser_handler}")
-                case "netflix":
-                    if self.browser_handler is not None:
-                        self.browser_handler.in_netflix(command_words[1:])
-                    else:
-                        print("No open browser")
-                case _:
-                    print(f"Command {command_words} not recognized")
+            try:
+                match command_words[0]:
+                    case "browser":
+                        if len(command_words) > 1:
+                            self.browser_handler = BrowserHandler.open_browser(command_words[1:])
+                            print(f"Crated browser handler {self.browser_handler}")
+                        else:
+                            print("Not enough words after browser")
+                    case "netflix":
+                        if self.browser_handler is not None:
+                            if len(command_words) > 1:
+                                self.browser_handler.in_netflix(command_words[1:])
+                            else:
+                                print("Not enough words after netflix")
+                        else:
+                            print("No open browser")
+                    case _:
+                        print(f"Command {command_words} not recognized")
+            except Exception:
+                print(f"Error executing {command_words}:{traceback.format_exc()}")
         else:
             print("No command to run")
 
