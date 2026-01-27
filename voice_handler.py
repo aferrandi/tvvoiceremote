@@ -2,16 +2,19 @@
 # !/usr/bin/env python3
 
 import json
+import os
 import queue
 import re
 import sys
+import time
 import traceback
 from dataclasses import dataclass
 from typing import Optional, Any, Self
 
+import sh
 import sounddevice as sd
 from _cffi_backend import buffer
-from playwright.sync_api import sync_playwright, Page, Playwright, Locator
+from playwright.sync_api import sync_playwright, Page, Playwright, Locator, PlaywrightContextManager, Browser
 from vosk import Model, KaldiRecognizer
 from thefuzz import fuzz
 
@@ -27,6 +30,24 @@ class BrowserHandler:
         self.page: Page = page
         self.playwright = playwright
 
+
+    @classmethod
+    def connect_to_browser_if_available(cls, p: Playwright) -> Optional[Browser]:
+        try:
+            return p.chromium.connect_over_cdp("http://localhost:9222")
+        except:
+            return None
+
+    @classmethod
+    def connect_to_browser_when_available(cls, p: Playwright) -> Optional[Browser]:
+        for i in range(0, 10):
+            browser = cls.connect_to_browser_if_available(p)
+            if browser is not None:
+                return browser
+            time.sleep(1)
+        return None
+
+
     @classmethod
     def open_browser(cls, web_pages: list[str]) -> Self:
         web_page_name = web_pages[0]
@@ -34,18 +55,22 @@ class BrowserHandler:
         if web_page_url is not None:
             p = sync_playwright().start()
             print(f"open {web_page_url}")
-            browser = p.chromium.launch_persistent_context("./user_data", headless=False)
-            print(f"browser {browser}")
-            page = browser.pages[0]
-            print(f"page {page}")
-            page.goto(web_page_url)
-            browser_handler = BrowserHandler(page, p)
-            # page.pause()
-            # try:
-            #     page.wait_for_timeout(100000)
-            # except:
-            #     print("Browser closed")
-            return browser_handler
+            os.system("/snap/bin/chromium --remote-debugging-port=9222 &")
+            browser = cls.connect_to_browser_when_available(p)
+            if browser is not None:
+                default_context = browser.contexts[0]
+                print(f"browser {browser}")
+                page = default_context.pages[0]
+                page.goto(web_page_url)
+                browser_handler = BrowserHandler(page, p)
+                # page.pause()
+                # try:
+                #     page.wait_for_timeout(100000)
+                # except:
+                #     print("Browser closed")
+                return browser_handler
+            else:
+                return None
         else:
             print(f"web page not recognized: {web_page_name}")
             return None
@@ -97,7 +122,7 @@ class MicrophoneHandler:
         if len(command_words) > 0:
             try:
                 match command_words[0]:
-                    case "browser":
+                    case "browser" | "browse":
                         if len(command_words) > 1:
                             self.browser_handler = BrowserHandler.open_browser(command_words[1:])
                             print(f"Crated browser handler {self.browser_handler}")
