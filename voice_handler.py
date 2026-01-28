@@ -4,19 +4,18 @@
 import json
 import os
 import queue
-import re
 import sys
 import time
 import traceback
 from dataclasses import dataclass
-from typing import Optional, Any, Self
+from typing import Optional, Any
 
-import sh
 import sounddevice as sd
 from _cffi_backend import buffer
-from playwright.sync_api import sync_playwright, Page, Playwright, Locator, PlaywrightContextManager, Browser
-from vosk import Model, KaldiRecognizer
+from playwright.sync_api import sync_playwright, Page, Playwright, Locator, Browser
 from thefuzz import fuzz
+from vosk import Model, KaldiRecognizer
+
 
 @dataclass(frozen=True)
 class WordWithMatchProbability:
@@ -25,67 +24,9 @@ class WordWithMatchProbability:
     match_probability: float
 
 
-class BrowserHandler:
-    def __init__(self, page: Page, playwright: Playwright) -> None:
+class PageHandler:
+    def __init__(self, page: Page) -> None:
         self.page: Page = page
-        self.playwright = playwright
-
-
-    @classmethod
-    def connect_to_browser_if_available(cls, p: Playwright) -> Optional[Browser]:
-        try:
-            return p.chromium.connect_over_cdp("http://localhost:9222")
-        except:
-            return None
-
-    @classmethod
-    def connect_to_browser_when_available(cls, p: Playwright) -> Optional[Browser]:
-        for i in range(0, 10):
-            browser = cls.connect_to_browser_if_available(p)
-            if browser is not None:
-                return browser
-            time.sleep(1)
-        return None
-
-
-    @classmethod
-    def open_browser(cls, web_pages: list[str]) -> Self:
-        web_page_name = web_pages[0]
-        web_page_url = cls.extract_web_page(web_page_name)
-        if web_page_url is not None:
-            p = sync_playwright().start()
-            print(f"open {web_page_url}")
-            os.system("/snap/bin/chromium --remote-debugging-port=9222 &")
-            browser = cls.connect_to_browser_when_available(p)
-            if browser is not None:
-                default_context = browser.contexts[0]
-                print(f"browser {browser}")
-                page = default_context.pages[0]
-                page.goto(web_page_url)
-                browser_handler = BrowserHandler(page, p)
-                # page.pause()
-                # try:
-                #     page.wait_for_timeout(100000)
-                # except:
-                #     print("Browser closed")
-                return browser_handler
-            else:
-                return None
-        else:
-            print(f"web page not recognized: {web_page_name}")
-            return None
-
-
-    @classmethod
-    def extract_web_page(cls, web_page: str) -> Optional[str]:
-        match web_page:
-            case "repubblica" | "republican":
-                return "https://www.repubblica.it"
-            case "netflix":
-                return "https://www.netflix.com"
-            case _:
-                return None
-
 
     def in_netflix(self, action: list[str]) -> None:
         if "netflix" in self.page.url:
@@ -113,9 +54,72 @@ class BrowserHandler:
     def build_word_with_match_probability(self, el: Locator, title: str) -> WordWithMatchProbability:
         return WordWithMatchProbability(el, el.text_content(), fuzz.ratio(title, el.text_content()))
 
+class BrowserHandler:
+    def __init__(self, browser: Browser) -> None:
+        self.browser: Browser = browser
+        self.page_handler: Optional[PageHandler] = None
+
+    def open_page(self, web_pages: list[str]):
+        web_page_name = web_pages[0]
+        print(f"Opening page {web_page_name}")
+        web_page_url = self.extract_web_page(web_page_name)
+        if web_page_url is not None:
+            print(f"Opening page with url {web_page_url}")
+            default_context = self.browser.contexts[0]
+            page = default_context.pages[0]
+            page.goto(web_page_url)
+            self.page_handler = PageHandler(page)
+        else:
+            print(f"Url not found for page {web_page_name}")
+
+
+    @classmethod
+    def extract_web_page(cls, web_page: str) -> Optional[str]:
+        match web_page:
+            case "repubblica" | "republican":
+                return "https://www.repubblica.it"
+            case "netflix":
+                return "https://www.netflix.com"
+            case _:
+                return None
+
+    def in_netflix(self, action: list[str]) -> None:
+        if self.page_handler is not None:
+            self.page_handler.in_netflix(action)
+        else:
+            print(f"Page handler not found for action {action}")
+
+    def is_valid(self):
+        return self.browser.is_connected()
+
+class BrowserBuilder:
+    def __init__(self) -> None:
+        self.playwright = sync_playwright().start()
+
+    def open_browser(self) -> BrowserHandler:
+        os.system("/snap/bin/chromium --remote-debugging-port=9222 &")
+        browser = self.connect_to_browser_when_available()
+        return BrowserHandler(browser)
+
+    def connect_to_browser_if_available(self) -> Optional[Browser]:
+        try:
+            return self.playwright.chromium.connect_over_cdp("http://localhost:9222")
+        except:
+            return None
+
+    def connect_to_browser_when_available(self) -> Optional[Browser]:
+        for i in range(0, 10):
+            browser = self.connect_to_browser_if_available()
+            if browser is not None:
+                return browser
+            time.sleep(1)
+        return None
+
+
 
 class MicrophoneHandler:
     def __init__(self) -> None:
+        self.browser_builder = BrowserBuilder()
         self.browser_handler: Optional[BrowserHandler] = None
 
     def do_something(self, command_words: list[str]) -> None:
@@ -124,12 +128,14 @@ class MicrophoneHandler:
                 match command_words[0]:
                     case "browser" | "browse":
                         if len(command_words) > 1:
-                            self.browser_handler = BrowserHandler.open_browser(command_words[1:])
-                            print(f"Crated browser handler {self.browser_handler}")
+                            if self.browser_handler is None or not self.browser_handler.is_valid():
+                                self.browser_handler = self.browser_builder.open_browser()
+                                print(f"Crated browser handler {self.browser_handler}")
+                            self.browser_handler.open_page(command_words[1:])
                         else:
                             print("Not enough words after browser")
                     case "netflix":
-                        if self.browser_handler is not None:
+                        if self.browser_handler is not None and self.browser_handler.is_valid():
                             if len(command_words) > 1:
                                 self.browser_handler.in_netflix(command_words[1:])
                             else:
@@ -144,8 +150,9 @@ class MicrophoneHandler:
             print("No command to run")
 
 
+
     def do_something_if_requested(self, words: list[str]) -> None:
-        words = [w for w in words if w not in   ["a", "and", "but"]]
+        words = [w for w in words if w not in   ["a", "and", "but", "the", "that"]]
         if len(words) > 0:
             first_word = words[0]
             if first_word == "max"  and len(words) >= 2:
