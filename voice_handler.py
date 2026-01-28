@@ -12,6 +12,7 @@ from typing import Optional, Any
 
 import sounddevice as sd
 from _cffi_backend import buffer
+from playwright._impl._errors import TargetClosedError
 from playwright.sync_api import sync_playwright, Page, Playwright, Locator, Browser
 from thefuzz import fuzz
 from vosk import Model, KaldiRecognizer
@@ -52,7 +53,12 @@ class PageHandler:
         print(f"clicked on {title}")
 
     def build_word_with_match_probability(self, el: Locator, title: str) -> WordWithMatchProbability:
-        return WordWithMatchProbability(el, el.text_content(), fuzz.ratio(title, el.text_content()))
+        text_content = el.text_content()
+        text_content_words = text_content.split(" ")
+        return WordWithMatchProbability(el, text_content, max([fuzz.ratio(title,  one_word) for one_word in text_content_words]))
+
+    def is_valid(self):
+        return not self.page.is_closed()
 
 class BrowserHandler:
     def __init__(self, browser: Browser) -> None:
@@ -84,10 +90,10 @@ class BrowserHandler:
                 return None
 
     def in_netflix(self, action: list[str]) -> None:
-        if self.page_handler is not None:
+        if self.page_handler is not None and self.page_handler.is_valid():
             self.page_handler.in_netflix(action)
         else:
-            print(f"Page handler not found for action {action}")
+            print(f"Page handler not found or invalid for action {action}")
 
     def is_valid(self):
         return self.browser.is_connected()
@@ -144,6 +150,9 @@ class MicrophoneHandler:
                             print("No open browser")
                     case _:
                         print(f"Command {command_words} not recognized")
+            except TargetClosedError:
+                self.browser_handler = None
+                print(f"Error executing {command_words}:{traceback.format_exc()}. Use new browser instance")
             except Exception:
                 print(f"Error executing {command_words}:{traceback.format_exc()}")
         else:
