@@ -34,15 +34,51 @@ class PageHandler:
             title = action[0]
             match title:
                 case "close":
-                    print("Close movie")
-                    self.page.get_by_role("dialog").get_by_role("button").locator('[data-uia="previewModal-closebtn"]:scope').click()
+                    if not self.watching_video():
+                        print("Close movie")
+                        self.page.get_by_role("dialog").get_by_role("button").locator('[data-uia="previewModal-closebtn"]:scope').click()
+                    else:
+                        print("Please stop the movie first")
                 case "start":
-                    print("Start movie")
-                    self.page.get_by_role("dialog").get_by_role("link").locator('[data-uia="play-button"]:scope').click()
+                    if not self.watching_video():
+                        print("Start movie")
+                        self.page.get_by_role("dialog").get_by_role("link").locator('[data-uia="play-button"]:scope').click()
+                    else:
+                        print("Please stop the movie first")
+                case "stop":
+                    if self.watching_video():
+                        print("Stop movie")
+                        self.make_buttons_visible()
+                        self.page.get_by_role("button").locator('[data-uia="control-nav-back"]:scope').click()
+                    else:
+                        print("Not watching a movie")
+                case "play":
+                    if self.watching_video():
+                        print("Play movie")
+                        self.make_buttons_visible()
+                        self.page.get_by_role("button").locator('[data-uia="control-play-pause-play"]:scope').click()
+                    else:
+                        print("Not watching a movie")
+                case "wait":
+                    if self.watching_video():
+                        print("Pause movie")
+                        self.make_buttons_visible()
+                        self.page.get_by_role("button").locator('[data-uia="control-play-pause-pause"]:scope').click()
+                    else:
+                        print("Not watching a movie")
                 case _:
-                    self.in_netflix_movie_with_title(title)
+                    if not self.watching_video():
+                        self.in_netflix_movie_with_title(title)
+                    else:
+                        print("Please stop the movie first")
         else:
             print(f"The page is not netflix but {self.page.title()}")
+
+    def make_buttons_visible(self):
+        self.page.locator("video").hover()
+
+    def watching_video(self) -> bool:
+        return self.page.locator("video").count() > 0
 
     def in_netflix_movie_with_title(self, title: str) -> None:
         lst = self.page.get_by_role('link')
@@ -74,6 +110,7 @@ class BrowserHandler:
             default_context = self.browser.contexts[0]
             page = default_context.pages[0]
             page.goto(web_page_url)
+            page.set_default_timeout(2000)
             self.page_handler = PageHandler(page)
         else:
             print(f"Url not found for page {web_page_name}")
@@ -161,7 +198,7 @@ class MicrophoneHandler:
 
 
     def do_something_if_requested(self, words: list[str]) -> None:
-        words = [w for w in words if w not in   ["a", "and", "but", "the", "that"]]
+        words = [w for w in words if len(w) > 2 and w not in ["and", "but", "the", "that"]]
         if len(words) > 0:
             first_word = words[0]
             if first_word == "max"  and len(words) >= 2:
