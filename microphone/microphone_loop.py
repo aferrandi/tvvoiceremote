@@ -18,10 +18,10 @@ class RecordCallbackHandler:
         self._q.put(bytes(indata))
 
 
-def recording_loop(q: queue.Queue[Any], recognizer: KaldiRecognizer):
+def recording_loop(q: queue.Queue[Any], recognizer: KaldiRecognizer, chromium_path: str) -> None:
     print("===> Begin recording. Press Ctrl+C to stop the recording ")
     callback_handler = RecordCallbackHandler(q)
-    microphone_handler = MicrophoneHandler()
+    microphone_handler = MicrophoneHandler(chromium_path)
     try:
         with sd.RawInputStream(dtype='int16', callback=callback_handler.recordCallback):
             while True:

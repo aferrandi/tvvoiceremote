@@ -10,8 +10,8 @@ from browser.browser_handler import BrowserHandler
 
 
 class MicrophoneHandler:
-    def __init__(self) -> None:
-        self.browser_builder = BrowserBuilder()
+    def __init__(self, chromium_path: str) -> None:
+        self.browser_builder = BrowserBuilder(chromium_path)
         self.browser_handler: Optional[BrowserHandler] = None
 
     def do_something(self, command_words: list[str]) -> None:
@@ -29,7 +29,7 @@ class MicrophoneHandler:
                     case "netflix":
                         if self.browser_handler is not None and self.browser_handler.is_valid():
                             if len(command_words) > 1:
-                                self.browser_handler.in_netflix(command_words[1:])
+                                self.browser_handler.in_page("netflix", command_words[1:])
                             else:
                                 print("Not enough words after netflix")
                         else:

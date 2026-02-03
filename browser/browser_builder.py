@@ -8,11 +8,12 @@ from browser.browser_handler import BrowserHandler
 
 
 class BrowserBuilder:
-    def __init__(self) -> None:
+    def __init__(self, chromium_path: str) -> None:
+        self.chromium_path =  chromium_path
         self.playwright = sync_playwright().start()
 
     def open_browser(self) -> BrowserHandler:
-        os.system("/snap/bin/chromium --remote-debugging-port=9222 &")
+        os.system(f"{self.chromium_path} --remote-debugging-port=9222 &")
         browser = self.connect_to_browser_when_available()
         return BrowserHandler(browser)
 
