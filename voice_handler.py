@@ -17,8 +17,8 @@ def main():
     recording_loop(q, recognizer, browser_path)
 
 def get_argument(argv: list[str], index: int,  default_value: str) -> str:
-    if len(argv) > index:
-        return argv[index]
+    if len(argv) > index + 1:
+        return argv[index + 1]
     else:
         return default_value
 
