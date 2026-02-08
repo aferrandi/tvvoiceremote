@@ -13,8 +13,15 @@ def main():
     recognizer = init_recognizer()
     # setup queue and callback function
     q = queue.Queue()
-    browser_path = sys.argv.get(0, "/snap/bin/chromium")
+    browser_path = get_argument(sys.argv, 0, "/snap/bin/chromium")
     recording_loop(q, recognizer, browser_path)
+
+def get_argument(argv: list[str], index: int,  default_value: str) -> str:
+    if len(argv) > index:
+        return argv[index]
+    else:
+        return default_value
+
 
 if __name__ == "__main__":
     main()
