@@ -16,5 +16,6 @@ class Config:
 def read_config() -> Config:
     with open("config_example.toml", "rb") as f:
         data = tomllib.load(f)
-        print(f"Configuration: {data}")
-        return Config(**data)
+        config = Config(**data)
+        print(f"Configuration: {config}")
+        return config
