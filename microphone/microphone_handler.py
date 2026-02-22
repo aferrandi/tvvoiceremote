@@ -1,12 +1,13 @@
 import json
 import traceback
-from typing import Optional, Any
+from typing import Optional, Any, Literal
 
 from playwright._impl._errors import TargetClosedError
 from vosk import KaldiRecognizer
 
 from browser.browser_builder import BrowserBuilder
 from browser.browser_handler import BrowserHandler
+from utils.text_utils import TextUtils
 
 
 class MicrophoneHandler:
@@ -48,7 +49,7 @@ class MicrophoneHandler:
 
 
     def do_something_if_requested(self, words: list[str]) -> None:
-        words = [w for w in words if len(w) > 2 and w not in ["and", "but", "the", "that", "huh"]]
+        words = TextUtils.remove_stopwords(words)
         if len(words) > 0:
             first_word = words[0]
             if first_word == self._listener_name and len(words) >= 2:
@@ -59,6 +60,7 @@ class MicrophoneHandler:
                 print(f"Not a command: {words}")
         else:
             print("No command, nothing to do")
+
 
 
     def read_from_microphone(self, recognizer: KaldiRecognizer, data: Any) -> None:

@@ -1,6 +1,9 @@
 from thefuzz import fuzz
 from dataclasses import dataclass
 
+from utils.text_utils import TextUtils
+
+
 @dataclass(frozen=True)
 class PossibleMatch[T]:
     source: T
@@ -20,5 +23,8 @@ class ClosestTitleFinder[T]:
 
     @classmethod
     def build_word_with_match_probability(cls, possible_match: PossibleMatch[T], title_to_search: str) -> WordWithMatchProbability[T]:
-        text_content_words = possible_match.text.split(" ")
-        return WordWithMatchProbability(possible_match, max([fuzz.ratio(title_to_search, one_word) for one_word in text_content_words]))
+        words = possible_match.text.split(" ")
+        words_no_stopwords = TextUtils.remove_stopwords(words)
+        words_with_probabilities = [fuzz.ratio(title_to_search, one_word) for one_word in words_no_stopwords]
+        whole_sentence_with_probability = fuzz.ratio(title_to_search, " ".join(words_no_stopwords))
+        return WordWithMatchProbability(possible_match, max(words_with_probabilities + [whole_sentence_with_probability]))

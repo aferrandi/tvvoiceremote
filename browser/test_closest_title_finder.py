@@ -60,7 +60,9 @@ class TestClosestTitleFinder(TestCase):
         self.assertEqual("Agente 007 – Missione Goldfinger", self.movie_box_with_text(possible_matches,  "Goldhinger"))
         self.assertEqual("Avvocato di difesa - The Lincoln Lawyer", self.movie_box_with_text(possible_matches,  "Lincoln"))
         self.assertEqual("Il problema dei 3 corpi", self.movie_box_with_text(possible_matches,  "corpe"))
-        self.assertEqual("Il problema dei 3 corpi", self.movie_box_with_text(possible_matches,  "addams"))
+        self.assertEqual("La famiglia Addams", self.movie_box_with_text(possible_matches,  "addams"))
+        self.assertEqual("No Time to Die", self.movie_box_with_text(possible_matches, "time die"))
+        self.assertEqual("Agente 007 – Missione Goldfinger", self.movie_box_with_text(possible_matches, "Agente Missione"))
 
     def movie_box_with_text(self, possible_matches: list[PossibleMatch[None]], text_to_find: str) -> str:
         return ClosestTitleFinder.fuzzy_search_of_text(possible_matches, text_to_find).possible_match.text
