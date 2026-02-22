@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 from utils.text_utils import TextUtils
 
-
 @dataclass(frozen=True)
 class PossibleMatch[T]:
     source: T
@@ -17,8 +16,9 @@ class WordWithMatchProbability[T]:
 class ClosestTitleFinder[T]:
     @classmethod
     def fuzzy_search_of_text(cls, possible_matches: list[PossibleMatch[T]], title_to_search: str) -> WordWithMatchProbability[T]:
-        locators_with_probabilities = [cls.build_word_with_match_probability(p, title_to_search) for p in possible_matches]
-        closest = max(locators_with_probabilities, key=lambda item: item.match_probability)
+        possible_matches_with_probabilities = [cls.build_word_with_match_probability(p, title_to_search) for p in possible_matches]
+        print(f"Possible matches with probabilities for {title_to_search}: {[f'{m.possible_match.text} {m.match_probability}' for m in possible_matches_with_probabilities]}")
+        closest = max(possible_matches_with_probabilities, key=lambda item: item.match_probability)
         return closest
 
     @classmethod
