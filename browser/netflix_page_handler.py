@@ -47,7 +47,7 @@ class NetflixPageHandler(PageHandler):
                         print("Not watching a movie")
                 case _:
                     if not self._watching_video():
-                        locator_movie_links = self.page().get_by_role('link')
+                        locator_movie_links = self.page().locator('[id^="title-card"]').get_by_role('link')
                         NetflixMovieFinder.in_netflix_movie_with_title(locator_movie_links, title)
                     else:
                         print("Please stop the movie first")
