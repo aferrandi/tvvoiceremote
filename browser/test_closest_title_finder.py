@@ -4,10 +4,6 @@ from browser.closest_title_finder import PossibleMatch, ClosestTitleFinder
 
 
 class TestClosestTitleFinder(TestCase):
-    """
-    <a href="/browse/original-audio" data-navigation-tab-name="audioSubtitles">Sfoglia per lingua</a>
-    """
-
     def test_fuzzy_search_of_text(self):
         titles = [
             'The Night Agent',
@@ -60,5 +56,11 @@ class TestClosestTitleFinder(TestCase):
             'Outer Banks'
         ]
         possible_matches = [PossibleMatch[None](None, t) for t in titles]
-        self.assertEqual("Agente 007 – Missione Goldfinger", ClosestTitleFinder.fuzzy_search_of_text(possible_matches, "Goldfinger").possible_match.text)
+        self.assertEqual("Agente 007 – Missione Goldfinger", self.movie_box_with_text(possible_matches, "Goldfinger"))
+        self.assertEqual("Agente 007 – Missione Goldfinger", self.movie_box_with_text(possible_matches,  "Goldhinger"))
+        self.assertEqual("Avvocato di difesa - The Lincoln Lawyer", self.movie_box_with_text(possible_matches,  "Lincoln"))
+        self.assertEqual("Il problema dei 3 corpi", self.movie_box_with_text(possible_matches,  "corpe"))
+        self.assertEqual("Il problema dei 3 corpi", self.movie_box_with_text(possible_matches,  "addams"))
 
+    def movie_box_with_text(self, possible_matches: list[PossibleMatch[None]], text_to_find: str) -> str:
+        return ClosestTitleFinder.fuzzy_search_of_text(possible_matches, text_to_find).possible_match.text
