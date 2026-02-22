@@ -14,7 +14,7 @@ class Config:
     sites: list[Site]
 
 def read_config() -> Config:
-    with open("config_example.toml", "rb") as f:
+    with open("config.toml", "rb") as f:
         data = tomllib.load(f)
         config = Config(**data)
         print(f"Configuration: {config}")
