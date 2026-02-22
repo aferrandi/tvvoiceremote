@@ -10,9 +10,10 @@ from browser.browser_handler import BrowserHandler
 
 
 class MicrophoneHandler:
-    def __init__(self, chromium_path: str) -> None:
+    def __init__(self, chromium_path: str, listener_name: str) -> None:
         self.browser_builder = BrowserBuilder(chromium_path)
         self.browser_handler: Optional[BrowserHandler] = None
+        self._listener_name = listener_name
 
     def do_something(self, command_words: list[str]) -> None:
         if len(command_words) > 0:
@@ -47,10 +48,10 @@ class MicrophoneHandler:
 
 
     def do_something_if_requested(self, words: list[str]) -> None:
-        words = [w for w in words if len(w) > 2 and w not in ["and", "but", "the", "that"]]
+        words = [w for w in words if len(w) > 2 and w not in ["and", "but", "the", "that", "huh"]]
         if len(words) > 0:
             first_word = words[0]
-            if first_word == "max"  and len(words) >= 2:
+            if first_word == self._listener_name and len(words) >= 2:
                 self.do_something(words[1:])
             elif first_word == "hi" and len(words) >= 3:
                 self.do_something_if_requested(words[1:])
