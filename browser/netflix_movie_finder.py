@@ -1,3 +1,5 @@
+from typing import Optional
+
 from playwright.sync_api import Locator
 
 from browser.closest_title_finder import ClosestTitleFinder, PossibleMatch
@@ -10,10 +12,13 @@ class NetflixMovieFinder:
         print(f"Possible matches: {[p.text for p in possible_matches]}")
         closest = ClosestTitleFinder[Locator].fuzzy_search_of_text(possible_matches, title_to_search)
         print(f"Netflix click {closest}")
-        closest.locator.click()
+        closest.possible_match.source.click()
         print(f"clicked on {title_to_search}")
 
     @classmethod
-    def _possible_match_from_locator(cls, locator: Locator) -> PossibleMatch[Locator]:
-        text_content = locator.text_content()
-        return PossibleMatch[Locator](locator, text_content)
+    def _possible_match_from_locator(cls, locator: Locator) -> Optional[PossibleMatch[Locator]]:
+        text_content = locator.text_content().strip()
+        if text_content != '':
+            return PossibleMatch[Locator](locator, text_content)
+        else:
+            return None
