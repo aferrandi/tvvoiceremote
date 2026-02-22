@@ -3,25 +3,22 @@
 
 import queue
 import sys
+from dataclasses import dataclass
 
+from config_reader import Config, read_config
 from microphone.microphone_init import init_recognizer
 from microphone.microphone_loop import recording_loop
 
+@dataclass(frozen=True)
 
 def main():
+    config = read_config()
     '''This script processes audio input from the microphone and displays the transcribed text.'''
     recognizer = init_recognizer()
     # setup queue and callback function
     q = queue.Queue()
-    browser_path = get_argument(sys.argv, 0, "/snap/bin/chromium")
-    listener_name = get_argument(sys.argv, 1, "max")
-    recording_loop(q, recognizer, browser_path, listener_name)
+    recording_loop(q, recognizer, config)
 
-def get_argument(argv: list[str], index: int,  default_value: str) -> str:
-    if len(argv) > index + 1:
-        return argv[index + 1]
-    else:
-        return default_value
 
 
 if __name__ == "__main__":

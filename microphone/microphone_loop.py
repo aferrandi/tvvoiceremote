@@ -6,24 +6,25 @@ import sounddevice as sd
 from _cffi_backend import buffer
 from vosk import KaldiRecognizer
 
+from config_reader import Config
 from microphone.microphone_handler import MicrophoneHandler
 
 
 class RecordCallbackHandler:
     def __init__(self, q: queue.Queue[Any]):
         self._q = q
-    def recordCallback(self, indata: buffer, frames: int, time: None, status: sd.CallbackFlags) -> None:
+    def record_callback(self, indata: buffer, frames: int, time: None, status: sd.CallbackFlags) -> None:
         if status:
             print(status, file=sys.stderr)
         self._q.put(bytes(indata))
 
 
-def recording_loop(q: queue.Queue[Any], recognizer: KaldiRecognizer, chromium_path: str, listener_name: str) -> None:
+def recording_loop(q: queue.Queue[Any], recognizer: KaldiRecognizer, config: Config) -> None:
     print("===> Begin recording. Press Ctrl+C to stop the recording ")
     callback_handler = RecordCallbackHandler(q)
-    microphone_handler = MicrophoneHandler(chromium_path, listener_name)
+    microphone_handler = MicrophoneHandler(config)
     try:
-        with sd.RawInputStream(dtype='int16', callback=callback_handler.recordCallback):
+        with sd.RawInputStream(dtype='int16', callback=callback_handler.record_callback):
             while True:
                 data = q.get()
                 microphone_handler.read_from_microphone(recognizer, data)

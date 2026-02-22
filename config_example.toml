@@ -1,0 +1,10 @@
+chromium_path="/snap/bin/chromium"
+auditor_name="axel"
+
+[[sites]]
+key="repubblica"
+url="https://www.repubblica.it"
+
+[[sites]]
+key="corriere"
+url="https://www.corriere.it"
