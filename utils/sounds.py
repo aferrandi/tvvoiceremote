@@ -2,10 +2,10 @@ from playsound import playsound
 
 
 def play_correct() -> None:
-    playsound(r'correct.wav')
+    playsound(r'sounds/correct.wav')
 
 def play_error() -> None:
-    playsound(r'error.wav')
+    playsound(r'sounds/error.wav')
 
 def print_error(text: str) -> None:
     print(text)
