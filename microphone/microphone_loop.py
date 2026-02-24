@@ -29,7 +29,6 @@ def recording_loop(q: queue.Queue[Any], recognizer: KaldiRecognizer, config: Con
             while True:
                 data = q.get()
                 microphone_handler.read_from_microphone(recognizer, data)
-                time.sleep(0.5)
     except KeyboardInterrupt:
         print('===> Finished Recording')
     except Exception as e:
