@@ -2,6 +2,7 @@ from playwright.sync_api import Page
 
 from browser.netflix_movie_finder import NetflixMovieFinder
 from browser.page_handler import PageHandler
+from utils.sounds import print_error, print_correct
 
 
 class NetflixPageHandler(PageHandler):
@@ -16,43 +17,48 @@ class NetflixPageHandler(PageHandler):
                     if not self._watching_video():
                         print("Close movie")
                         self.page().get_by_role("dialog").get_by_role("button").locator('[data-uia="previewModal-closebtn"]:scope').click()
+                        print_correct("Movie closed")
                     else:
-                        print("Please stop the movie first")
+                        print_error("Please stop the movie first")
                 case "start":
                     if not self._watching_video():
                         print("Start movie")
                         self.page().get_by_role("dialog").get_by_role("link").locator('[data-uia="play-button"]:scope').click()
+                        print_correct("Movie started")
                     else:
-                        print("Please stop the movie first")
+                        print_error("Please stop the movie first")
                 case "stop":
                     if self._watching_video():
                         print("Stop movie")
                         self._make_buttons_visible()
                         self.page().get_by_role("button").locator('[data-uia="control-nav-back"]:scope').click()
+                        print_correct("Movie stopped")
                     else:
-                        print("Not watching a movie")
+                        print_error("Not watching a movie")
                 case "play":
                     if self._watching_video():
                         print("Play movie")
                         self._make_buttons_visible()
                         self.page().get_by_role("button").locator('[data-uia="control-play-pause-play"]:scope').click()
+                        print_correct("Movie played")
                     else:
-                        print("Not watching a movie")
+                        print_error("Not watching a movie")
                 case "wait":
                     if self._watching_video():
                         print("Pause movie")
                         self._make_buttons_visible()
                         self.page().get_by_role("button").locator('[data-uia="control-play-pause-pause"]:scope').click()
+                        print_correct("Movie paused")
                     else:
-                        print("Not watching a movie")
+                        print_error("Not watching a movie")
                 case _:
                     if not self._watching_video():
                         locator_movie_links = self.page().locator('[id^="title-card"]').get_by_role('link')
                         NetflixMovieFinder.in_netflix_movie_with_title(locator_movie_links, title)
                     else:
-                        print("Please stop the movie first")
+                        print_error("Please stop the movie first")
         else:
-            print(f"The page is not netflix but {self.page().title()}")
+            print_error(f"The page is not netflix but {self.page().title()}")
 
     def is_valid(self):
         return not self.page().is_closed()

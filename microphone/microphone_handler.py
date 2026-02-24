@@ -8,6 +8,7 @@ from vosk import KaldiRecognizer
 from browser.browser_builder import BrowserBuilder
 from browser.browser_handler import BrowserHandler
 from config_reader import Config
+from utils.sounds import print_error
 from utils.text_utils import TextUtils
 
 
@@ -27,25 +28,26 @@ class MicrophoneHandler:
                                 self.browser_handler = self.browser_builder.open_browser()
                                 print(f"Crated browser handler {self.browser_handler}")
                             self.browser_handler.open_page(command_words[1:])
+                            pla
                         else:
-                            print("Not enough words after browser")
+                            print_error("Not enough words after browser")
                     case "netflix":
                         if self.browser_handler is not None and self.browser_handler.is_valid():
                             if len(command_words) > 1:
                                 self.browser_handler.in_page("netflix", command_words[1:])
                             else:
-                                print("Not enough words after netflix")
+                                print_error("Not enough words after netflix")
                         else:
-                            print("No open browser")
+                            print_error("No open browser")
                     case _:
-                        print(f"Command {command_words} not recognized")
+                        print_error(f"Command {command_words} not recognized")
             except TargetClosedError:
                 self.browser_handler = None
-                print(f"Error executing {command_words}:{traceback.format_exc()}. Use new browser instance")
+                print_error(f"Error executing {command_words}:{traceback.format_exc()}. Use new browser instance")
             except Exception:
-                print(f"Error executing {command_words}:{traceback.format_exc()}")
+                print_error(f"Error executing {command_words}:{traceback.format_exc()}")
         else:
-            print("No command to run")
+            print_error("No command to run")
 
 
 
@@ -55,12 +57,10 @@ class MicrophoneHandler:
             first_word = words[0]
             if first_word == self._config.auditor_name and len(words) >= 2:
                 self.do_something(words[1:])
-            elif first_word == "hi" and len(words) >= 3:
-                self.do_something_if_requested(words[1:])
             else:
-                print(f"Not a command: {words}")
+                print_error(f"Not a command: {words}")
         else:
-            print("No command, nothing to do")
+            print_error("No command, nothing to do")
 
 
 
