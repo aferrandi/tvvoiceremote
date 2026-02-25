@@ -9,3 +9,6 @@ class PageHandler:
 
     def page(self) -> Page:
         return self._page
+
+    def is_valid(self):
+        return not (self._page is None or self._page.is_closed())

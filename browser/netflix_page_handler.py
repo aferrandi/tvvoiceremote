@@ -14,56 +14,72 @@ class NetflixPageHandler(PageHandler):
             title = action[0]
             match title:
                 case "close":
-                    if not self._watching_video():
-                        print("Close movie")
-                        self.page().get_by_role("dialog").get_by_role("button").locator('[data-uia="previewModal-closebtn"]:scope').click()
-                        print_correct("Movie closed")
-                    else:
-                        print_error("Please stop the movie first")
+                    self._close()
                 case "start":
-                    if not self._watching_video():
-                        print("Start movie")
-                        self.page().get_by_role("dialog").get_by_role("link").locator('[data-uia="play-button"]:scope').click()
-                        print_correct("Movie started")
-                    else:
-                        print_error("Please stop the movie first")
+                    self._start()
                 case "stop":
-                    if self._watching_video():
-                        print("Stop movie")
-                        self._make_buttons_visible()
-                        self.page().get_by_role("button").locator('[data-uia="control-nav-back"]:scope').click()
-                        print_correct("Movie stopped")
-                    else:
-                        print_error("Not watching a movie")
+                    self._stop()
                 case "play":
-                    if self._watching_video():
-                        print("Play movie")
-                        self._make_buttons_visible()
-                        self.page().get_by_role("button").locator('[data-uia="control-play-pause-play"]:scope').click()
-                        print_correct("Movie played")
-                    else:
-                        print_error("Not watching a movie")
+                    self._play()
                 case "wait":
-                    if self._watching_video():
-                        print("Pause movie")
-                        self._make_buttons_visible()
-                        self.page().get_by_role("button").locator('[data-uia="control-play-pause-pause"]:scope').click()
-                        print_correct("Movie paused")
-                    else:
-                        print_error("Not watching a movie")
+                    self._wait()
                 case _:
-                    if not self._watching_video():
-                        locator_movie_links = self.page().locator('[id^="title-card"]').get_by_role('link')
-                        NetflixMovieFinder.in_netflix_movie_with_title(locator_movie_links, title)
-                    else:
-                        print_error("Please stop the movie first")
+                    self._netflix_movie(title)
         else:
             print_error(f"The page is not netflix but {self.page().title()}")
 
-    def is_valid(self):
-        return not self.page().is_closed()
+    def _netflix_movie(self, title: str) -> None:
+        if not self._watching_video():
+            locator_movie_links = self.page().locator('[id^="title-card"]').get_by_role('link')
+            NetflixMovieFinder.in_netflix_movie_with_title(locator_movie_links, title)
+        else:
+            print_error("Please stop the movie first")
 
-    def _make_buttons_visible(self):
+    def _wait(self) -> None:
+        if self._watching_video():
+            print("Pause movie")
+            self._make_buttons_visible()
+            self.page().get_by_role("button").locator('[data-uia="control-play-pause-pause"]:scope').click()
+            print_correct("Movie paused")
+        else:
+            print_error("Not watching a movie")
+
+    def _play(self) -> None:
+        if self._watching_video():
+            print("Play movie")
+            self._make_buttons_visible()
+            self.page().get_by_role("button").locator('[data-uia="control-play-pause-play"]:scope').click()
+            print_correct("Movie played")
+        else:
+            print_error("Not watching a movie")
+
+    def _stop(self) -> None:
+        if self._watching_video():
+            print("Stop movie")
+            self._make_buttons_visible()
+            self.page().get_by_role("button").locator('[data-uia="control-nav-back"]:scope').click()
+            print_correct("Movie stopped")
+        else:
+            print_error("Not watching a movie")
+
+    def _start(self) -> None:
+        if not self._watching_video():
+            print("Start movie")
+            self.page().get_by_role("dialog").get_by_role("link").locator('[data-uia="play-button"]:scope').click()
+            print_correct("Movie started")
+        else:
+            print_error("Please stop the movie first")
+
+    def _close(self) -> None:
+        if not self._watching_video():
+            print("Close movie")
+            self.page().get_by_role("dialog").get_by_role("button").locator(
+                '[data-uia="previewModal-closebtn"]:scope').click()
+            print_correct("Movie closed")
+        else:
+            print_error("Please stop the movie first")
+
+    def _make_buttons_visible(self) -> None:
         self.page().locator("video").hover()
 
     def _watching_video(self) -> bool:
