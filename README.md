@@ -1,3 +1,7 @@
+To watch Netflix on a browser giving vocal orders.
+
+
+
 must install libportaudio2
 
 sudo apt-get install libportaudio2
