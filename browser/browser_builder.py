@@ -6,6 +6,7 @@ from playwright.sync_api import sync_playwright, Browser
 
 from browser.browser_handler import BrowserHandler
 from config_reader import Config
+from utils.sounds import print_error
 
 
 class BrowserBuilder:
@@ -16,7 +17,11 @@ class BrowserBuilder:
     def open_browser(self) -> BrowserHandler:
         os.system(f"{self._config.chromium_path} --remote-debugging-port=9222 &")
         browser = self.connect_to_browser_when_available()
-        return BrowserHandler(browser, self._config.sites)
+        if browser is not None:
+            print("create browser handler")
+            return BrowserHandler(browser, self._config.sites)
+        else:
+            print_error("Cannot create browser handler with no browser")
 
     def connect_to_browser_if_available(self) -> Optional[Browser]:
         try:

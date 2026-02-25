@@ -56,4 +56,4 @@ class BrowserHandler:
             print_error(f"Page handler not found or invalid for action {action}")
 
     def is_valid(self):
-        return self._browser.is_connected()
+        return self._browser is not None and self._browser.is_connected()
