@@ -2,4 +2,4 @@ vosk
 playwright
 thefuzz
 sounddevice
-preferredsoundplayer
+nova

@@ -1,11 +1,10 @@
-from preferredsoundplayer import soundplay
-
+import nava
 
 def play_correct() -> None:
-    soundplay(r'sounds/correct.mp3')
+    nava.play((r'sounds/correct.wav')
 
 def play_error() -> None:
-    soundplay(r'sounds/error.mp3')
+    nava.play((r'sounds/error.wav')
 
 def print_error(text: str) -> None:
     print(text)
