@@ -58,9 +58,9 @@ class MicrophoneHandler:
             if first_word == self._config.auditor_name and len(words) >= 2:
                 self.do_something(words[1:])
             else:
-                print_error(f"Not a command: {words}")
+                print(f"Not a command: {words}")
         else:
-            print_error("No command, nothing to do")
+            print("No command, nothing to do")
 
 
 
