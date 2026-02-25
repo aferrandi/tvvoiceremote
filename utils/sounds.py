@@ -1,10 +1,10 @@
 import nava
 
 def play_correct() -> None:
-    nava.play((r'sounds/correct.wav')
+    nava.play(r'sounds/correct.wav')
 
 def play_error() -> None:
-    nava.play((r'sounds/error.wav')
+    nava.play(r'sounds/error.wav')
 
 def print_error(text: str) -> None:
     print(text)
