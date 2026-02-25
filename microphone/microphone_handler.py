@@ -23,22 +23,9 @@ class MicrophoneHandler:
             try:
                 match command_words[0]:
                     case "browser" | "browse":
-                        if len(command_words) > 1:
-                            if self.browser_handler is None or not self.browser_handler.is_valid():
-                                self.browser_handler = self.browser_builder.open_browser()
-                                print(f"Crated browser handler {self.browser_handler}")
-                            self.browser_handler.open_page(command_words[1:])
-                            pla
-                        else:
-                            print_error("Not enough words after browser")
+                        self._do_something_with_browser(command_words)
                     case "netflix":
-                        if self.browser_handler is not None and self.browser_handler.is_valid():
-                            if len(command_words) > 1:
-                                self.browser_handler.in_page("netflix", command_words[1:])
-                            else:
-                                print_error("Not enough words after netflix")
-                        else:
-                            print_error("No open browser")
+                        self._do_something_with_netflix(command_words)
                     case _:
                         print_error(f"Command {command_words} not recognized")
             except TargetClosedError:
@@ -49,7 +36,23 @@ class MicrophoneHandler:
         else:
             print_error("No command to run")
 
+    def _do_something_with_netflix(self, command_words: list[str]):
+        if self.browser_handler is not None and self.browser_handler.is_valid():
+            if len(command_words) > 1:
+                self.browser_handler.in_page("netflix", command_words[1:])
+            else:
+                print_error("Not enough words after netflix")
+        else:
+            print_error("No open browser")
 
+    def _do_something_with_browser(self, command_words: list[str]):
+        if len(command_words) > 1:
+            if self.browser_handler is None or not self.browser_handler.is_valid():
+                self.browser_handler = self.browser_builder.open_browser()
+                print(f"Crated browser handler {self.browser_handler}")
+            self.browser_handler.open_page(command_words[1:])
+        else:
+            print_error("Not enough words after browser")
 
     def do_something_if_requested(self, words: list[str]) -> None:
         words = TextUtils.remove_stopwords(words)
