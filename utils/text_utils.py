@@ -1,5 +1,5 @@
 class TextUtils:
     @staticmethod
     def remove_stopwords(words: list[str]) -> list[str]:
-        stop_words = ["hi", "how", "and", "but", "the", "that", "huh", "you", "yes", "no"]
+        stop_words = ["hi", "how", "and", "but", "the", "that", "huh", "you", "yes", "her", "next"]
         return [w for w in words if len(w) > 2 and w not in stop_words]
