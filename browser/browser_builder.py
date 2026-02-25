@@ -14,7 +14,7 @@ class BrowserBuilder:
         self._config =  config
         self._playwright = sync_playwright().start()
 
-    def open_browser(self) -> BrowserHandler:
+    def open_browser(self) -> Optional[BrowserHandler]:
         os.system(f"{self._config.chromium_path} --remote-debugging-port=9222 &")
         browser = self.connect_to_browser_when_available()
         if browser is not None:
@@ -22,6 +22,7 @@ class BrowserBuilder:
             return BrowserHandler(browser, self._config.sites)
         else:
             print_error("Cannot create browser handler with no browser")
+            return None
 
     def connect_to_browser_if_available(self) -> Optional[Browser]:
         try:
