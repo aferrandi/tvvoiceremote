@@ -11,7 +11,7 @@ from microphone.microphone_loop import recording_loop
 def main():
     config = read_config()
     '''This script processes audio input from the microphone and displays the transcribed text.'''
-    recognizer = init_recognizer()
+    recognizer = init_recognizer(config.microphone_name)
     # setup queue and callback function
     q = queue.Queue()
     recording_loop(q, recognizer, config)

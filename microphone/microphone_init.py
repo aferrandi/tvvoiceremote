@@ -2,12 +2,12 @@ import sounddevice as sd
 from vosk import KaldiRecognizer, Model
 
 
-def init_recognizer() -> KaldiRecognizer:
+def init_recognizer(microphone_name: str) -> KaldiRecognizer:
     # list all audio devices known to your system
     print("Display input/output devices")
     devices = sd.query_devices()
     print(devices)
-    sd.default.device = "Blue Snowball"
+    sd.default.device = microphone_name
     # get the samplerate - this is needed by the Kaldi recognizer
     device_info = sd.query_devices(sd.default.device, 'input')
     samplerate = int(device_info['default_samplerate'])

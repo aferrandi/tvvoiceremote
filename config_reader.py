@@ -1,6 +1,6 @@
 import tomllib
 from dataclasses import dataclass
-from typing import Any
+
 
 @dataclass(frozen=True)
 class Site:
@@ -9,6 +9,7 @@ class Site:
 
 @dataclass(frozen=True)
 class Config:
+    microphone_name: str
     chromium_path: str
     auditor_name: str
     sites: list[Site]
