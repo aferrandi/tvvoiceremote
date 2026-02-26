@@ -9,3 +9,7 @@ url="https://www.repubblica.it"
 [[sites]]
 key="corriere"
 url="https://www.corriere.it"
+
+[[commands]]
+key="shutdown"
+text="pishutdown"

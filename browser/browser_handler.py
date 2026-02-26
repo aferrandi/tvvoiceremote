@@ -2,7 +2,7 @@ from typing import Optional
 
 from playwright.sync_api import Browser, Page
 
-from browser.netflix_page_handler import NetflixPageHandler
+from browser.netflix.netflix_page_handler import NetflixPageHandler
 from browser.page_handler import PageHandler
 from config_reader import Site
 from utils.sounds import print_error, print_correct

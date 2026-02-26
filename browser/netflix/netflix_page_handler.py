@@ -1,6 +1,6 @@
 from playwright.sync_api import Page
 
-from browser.netflix_movie_finder import NetflixMovieFinder
+from browser.netflix.netflix_movie_finder import NetflixMovieFinder
 from browser.page_handler import PageHandler
 from utils.sounds import print_error, print_correct
 

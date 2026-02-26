@@ -2,7 +2,7 @@ from typing import Optional
 
 from playwright.sync_api import Locator
 
-from browser.closest_title_finder import ClosestTitleFinder, PossibleMatch
+from browser.netflix.closest_title_finder import ClosestTitleFinder, PossibleMatch
 from utils.sounds import print_correct, print_error
 
 

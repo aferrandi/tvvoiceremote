@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from browser.closest_title_finder import PossibleMatch, ClosestTitleFinder
+from browser.netflix.closest_title_finder import PossibleMatch, ClosestTitleFinder
 
 
 class TestClosestTitleFinder(TestCase):
