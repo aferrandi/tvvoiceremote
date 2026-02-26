@@ -18,7 +18,7 @@ class MicrophoneHandler:
         self.browser_handler: Optional[BrowserHandler] = None
         self._config = config
 
-    def do_something(self, command_words: list[str]) -> None:
+    def _do_something(self, command_words: list[str]) -> None:
         if len(command_words) > 0:
             try:
                 match command_words[0]:
@@ -59,13 +59,11 @@ class MicrophoneHandler:
         if len(words) > 0:
             first_word = words[0]
             if first_word == self._config.auditor_name and len(words) >= 2:
-                self.do_something(words[1:])
+                self._do_something(words[1:])
             else:
                 print(f"Not a command: {words}")
         else:
             print("No command, nothing to do")
-
-
 
     def read_from_microphone(self, recognizer: KaldiRecognizer, data: Any) -> None:
         if recognizer.AcceptWaveform(data):
