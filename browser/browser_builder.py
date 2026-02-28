@@ -19,7 +19,7 @@ class BrowserBuilder:
         browser = self._connect_to_browser_when_available()
         if browser is not None:
             print("create browser handler")
-            return BrowserHandler(browser, self._config.sites)
+            return BrowserHandler(browser, self._config)
         else:
             print_error("Cannot create browser handler with no browser")
             return None
