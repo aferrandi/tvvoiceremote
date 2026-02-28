@@ -2,12 +2,14 @@ from playwright.sync_api import Page
 
 from browser.netflix.netflix_movie_finder import NetflixMovieFinder
 from browser.page_handler import PageHandler
+from config_reader import Config
 from utils.sounds import print_error, print_correct
 
 
 class NetflixPageHandler(PageHandler):
-    def __init__(self, page: Page) -> None:
+    def __init__(self, page: Page, config: Config) -> None:
         super().__init__(page)
+        self._finder = NetflixMovieFinder(config)
 
     def in_page(self, action: list[str]) -> None:
         if "netflix" in self.page().url:
@@ -23,6 +25,8 @@ class NetflixPageHandler(PageHandler):
                     self._play()
                 case "wait":
                     self._wait()
+                case "back":
+                    self._back()
                 case _:
                     self._netflix_movie(title)
         else:
@@ -84,6 +88,13 @@ class NetflixPageHandler(PageHandler):
 
     def _watching_video(self) -> bool:
         return self.page().locator("video").count() > 0
+
+    def _back(self) -> None:
+        if not self._watching_video():
+            self.page().get_by_role("button").locator('[data-uia="control-navigate-back"]:scope').click()
+            print_correct("Navigated back")
+        else:
+            print_error("Please stop the movie first")
 
 
 

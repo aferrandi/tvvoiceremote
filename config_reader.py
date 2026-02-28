@@ -17,6 +17,7 @@ class Config:
     microphone_name: str
     chromium_path: str
     auditor_name: str
+    minimal_movie_match_probability: float
     sites: list[Site]
     commands: list[Command]
 

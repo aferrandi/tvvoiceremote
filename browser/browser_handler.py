@@ -4,14 +4,14 @@ from playwright.sync_api import Browser, Page
 
 from browser.netflix.netflix_page_handler import NetflixPageHandler
 from browser.page_handler import PageHandler
-from config_reader import Site
+from config_reader import Config
 from utils.sounds import print_error, print_correct
 
 
 class BrowserHandler:
-    def __init__(self, browser: Browser, sites: list[Site]) -> None:
+    def __init__(self, browser: Browser, config: Config) -> None:
         self._browser: Browser = browser
-        self._sites = sites
+        self._config = config
         self._page_handlers: dict[str, PageHandler] = {}
 
     def open_page(self, web_pages: list[str]) -> None:
@@ -33,7 +33,7 @@ class BrowserHandler:
     def _create_handler(self, page_type: str, page: Page) -> Optional[PageHandler]:
         match page_type:
             case "netflix":
-                return NetflixPageHandler(page)
+                return NetflixPageHandler(page, self._config)
             case _:
                 return None
 
@@ -42,7 +42,7 @@ class BrowserHandler:
             case "netflix":
                 return "https://www.netflix.com"
             case _:
-                matching_web_pages = [s for s in self._sites if s.key == web_page]
+                matching_web_pages = [s for s in self._config.sites if s.key == web_page]
                 if len(matching_web_pages) > 0:
                     return matching_web_pages[0].url
                 else:

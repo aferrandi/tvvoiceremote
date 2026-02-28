@@ -1,6 +1,7 @@
 microphone_name="Blue Snowball"
 chromium_path="/snap/bin/chromium"
 auditor_name="axel"
+minimal_movie_match_probability=65
 
 [[sites]]
 key="repubblica"
