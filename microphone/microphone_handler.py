@@ -54,7 +54,11 @@ class MicrophoneHandler:
             if self._browser_handler is None or not self._browser_handler.is_valid():
                 self._browser_handler = self._browser_builder.open_browser()
                 print(f"Crated browser handler {self._browser_handler}")
-            self._browser_handler.open_page(command_words[1:])
+            match command_words[1]:
+                case "close":
+                    self._browser_handler.close()
+                case _:
+                    self._browser_handler.open_page(command_words[1:])
         else:
             print_error("Not enough words after browser")
 
