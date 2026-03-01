@@ -1,5 +1,6 @@
 import json
 import traceback
+from functools import reduce
 from typing import Optional, Any
 
 from playwright._impl._errors import TargetClosedError
@@ -80,12 +81,13 @@ class MicrophoneHandler:
         else:
             print("No command, nothing to do")
 
-    def _words_from_text(self, text: list[str]) -> list[str]:
+    def _words_from_text(self, text: str) -> list[str]:
         words = text.split(" ")
         return TextUtils.remove_stopwords(words)
 
-    def _clean_text(self, text: str) -> list[str]:
-        return [text.replace(r.text_from, r.text_to) for r in self._config.text_replacements]
+    def _clean_text(self, text: str) -> str:
+        text_replacements = self._config.text_replacements
+        return reduce(lambda t, r: t.replace(r.text_from, r.text_to), text_replacements, text)
 
     def read_from_microphone(self, recognizer: KaldiRecognizer, data: Any) -> None:
         if recognizer.AcceptWaveform(data):
