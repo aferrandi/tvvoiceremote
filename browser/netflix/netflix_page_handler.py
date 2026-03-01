@@ -94,11 +94,8 @@ class NetflixPageHandler(PageHandler):
         return self.page().locator("video").count() > 0
 
     def _back(self) -> None:
-        if not self._watching_video():
-            self.page().get_by_role("button").locator('[data-uia="control-navigate-back"]:scope').click()
-            print_correct("Navigated back")
-        else:
-            print_error("Please stop the movie first")
+        self.page().get_by_role("button").locator('[data-uia="control-navigate-back"]:scope').click()
+        print_correct("Navigated back")
 
     def _down(self):
         if not self._watching_video():
