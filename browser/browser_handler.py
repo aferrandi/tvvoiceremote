@@ -61,8 +61,10 @@ class BrowserHandler:
         print("Closing the browser")
         self._browser.close()
         browser_procs = [proc for proc in psutil.process_iter(['name']) if proc.info['name'] == "chromium"]
+        print(f"Found {len(browser_procs)} chromium processes")
         for proc in browser_procs:
             try:
+                print(f"Stopping {proc.pid}")
                 proc.terminate()
             except Exception:
                 print_error(f"Error terminating process {traceback.format_exc()}")
