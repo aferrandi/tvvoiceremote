@@ -27,9 +27,9 @@ class NetflixPageHandler(PageHandler):
                     self._wait()
                 case "back":
                     self._back()
-                case "downward":
+                case "down":
                     self._down()
-                case "upward":
+                case "up":
                     self._up()
                 case _:
                     self._netflix_movie(title)
