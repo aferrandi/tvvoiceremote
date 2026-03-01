@@ -15,7 +15,7 @@ class Command:
 @dataclass(frozen=True)
 class TextReplacement:
     text_from: str
-    text_: str
+    text_to: str
 
 
 @dataclass(frozen=True)
