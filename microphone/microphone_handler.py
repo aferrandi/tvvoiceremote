@@ -68,8 +68,9 @@ class MicrophoneHandler:
         else:
             print_error("Not enough words for a command")
 
-    def _do_something_if_requested(self, words: list[str]) -> None:
-        words = TextUtils.remove_stopwords(words)
+    def _do_something_if_requested(self, text: str) -> None:
+        cleaned_text = self._clean_text(text)
+        words = self._words_from_text(cleaned_text)
         if len(words) > 0:
             first_word = words[0]
             if first_word == self._config.auditor_name and len(words) >= 2:
@@ -79,6 +80,13 @@ class MicrophoneHandler:
         else:
             print("No command, nothing to do")
 
+    def _words_from_text(self, text: list[str]) -> list[str]:
+        words = text.split(" ")
+        return TextUtils.remove_stopwords(words)
+
+    def _clean_text(self, text: str) -> list[str]:
+        return [text.replace(r.text_from, r.text_to) for r in self._config.text_replacements]
+
     def read_from_microphone(self, recognizer: KaldiRecognizer, data: Any) -> None:
         if recognizer.AcceptWaveform(data):
             result_text = recognizer.Result()
@@ -87,6 +95,6 @@ class MicrophoneHandler:
             text = result_dict.get("text", "")
             if text != "":
                 print(f"Text from microphone: {text}")
-                self._do_something_if_requested(text.split(" "))
+                self._do_something_if_requested(text)
             else:
                 print("no input sound")

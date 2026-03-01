@@ -3,6 +3,10 @@ chromium_path="/snap/bin/chromium"
 auditor_name="axel"
 minimal_movie_match_probability=65
 
+[[text_replacements]]
+text_from="net flicks"
+text_to="netflix"
+
 [[sites]]
 key="repubblica"
 url="https://www.repubblica.it"
