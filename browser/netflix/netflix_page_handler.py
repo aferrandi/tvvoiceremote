@@ -88,12 +88,14 @@ class NetflixPageHandler(PageHandler):
             print_error("Please stop the movie first")
 
     def _make_buttons_visible(self) -> None:
-        self.page().locator("video").hover()
+        if self._watching_video():
+            self.page().locator("video").hover()
 
     def _watching_video(self) -> bool:
         return self.page().locator("video").count() > 0
 
     def _back(self) -> None:
+        self._make_buttons_visible()
         self.page().get_by_role("button").locator('[data-uia="control-navigate-back"]:scope').click()
         print_correct("Navigated back")
 
