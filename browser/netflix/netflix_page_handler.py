@@ -27,6 +27,10 @@ class NetflixPageHandler(PageHandler):
                     self._wait()
                 case "back":
                     self._back()
+                case "downward":
+                    self._down()
+                case "upward":
+                    self._up()
                 case _:
                     self._netflix_movie(title)
         else:
@@ -96,7 +100,21 @@ class NetflixPageHandler(PageHandler):
         else:
             print_error("Please stop the movie first")
 
+    def _down(self):
+        if not self._watching_video():
+            print("scrolling down")
+            self.page().keyboard.press("PageDown")
+            print_correct("Scrolled down")
+        else:
+            print_error("Please stop the movie first")
 
+    def _up(self):
+        if not self._watching_video():
+            print("scrolling up")
+            self.page().keyboard.press("PageUp")
+            print_correct("Scrolled up")
+        else:
+            print_error("Please stop the movie first")
 
 
 
