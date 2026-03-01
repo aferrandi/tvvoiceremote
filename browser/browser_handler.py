@@ -1,5 +1,7 @@
+import traceback
 from typing import Optional
 
+import psutil
 from playwright.sync_api import Browser, Page
 
 from browser.netflix.netflix_page_handler import NetflixPageHandler
@@ -58,6 +60,12 @@ class BrowserHandler:
     def close(self) -> None:
         print("Closing the browser")
         self._browser.close()
+        browser_procs = [proc for proc in psutil.process_iter(['name']) if proc.info['name'] == "chromium"]
+        for proc in browser_procs:
+            try:
+                proc.terminate()
+            except Exception:
+                print_error(f"Error terminating process {traceback.format_exc()}")
         print_correct("Browser closed")
 
     def is_valid(self):
