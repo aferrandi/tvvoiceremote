@@ -46,7 +46,7 @@ class NetflixPageHandler(PageHandler):
     def _wait(self) -> None:
         if self._watching_video():
             print("Pause movie")
-            self.page().keyboard.press("K")
+            self.page().keyboard.press(" ")
             #self._make_button_visible_and_click('[data-uia="control-play-pause-pause"]:scope')
             print_correct("Movie paused")
         else:
@@ -55,7 +55,7 @@ class NetflixPageHandler(PageHandler):
     def _play(self) -> None:
         if self._watching_video():
             print("Play movie")
-            self.page().keyboard.press("K")
+            self.page().keyboard.press(" ")
             #self._make_button_visible_and_click('[data-uia="control-play-pause-play"]:scope')
             print_correct("Movie played")
         else:
