@@ -89,16 +89,16 @@ class NetflixPageHandler(PageHandler):
 
     def _make_button_visible_and_click(self, locator: str) -> None:
         if self._watching_video():
-            button = self._button_locator(locator)
-            if self._until_button_is_visible(button):
+            if self._until_button_is_visible(locator):
                 print("Clicking button")
-                button.click()
+                self._button_locator(locator).click()
                 print("Button clicked")
             else:
                 print_error("Not possible to click button")
 
-    def _until_button_is_visible(self, button: Locator) -> bool:
+    def _until_button_is_visible(self, locator: str) -> bool:
         for i in range(0, 30):
+            button = self._button_locator(locator)
             if button.is_visible() and self._is_enabled(button):
                 return True
             else:
