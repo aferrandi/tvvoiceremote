@@ -110,14 +110,20 @@ class NetflixPageHandler(PageHandler):
 
     def _is_enabled(self, locator: Locator) -> bool:
         try:
-            return locator.is_enabled(timeout=300)
+            enabled = locator.is_enabled(timeout=300)
+            if not enabled:
+                print("Not enabled")
+            return enabled
         except:
             print("not enabled")
             return False
 
     def _is_visible(self, locator: Locator) -> bool:
         try:
-            return locator.is_visible(timeout=300)
+            visible = locator.is_visible(timeout=300)
+            if not visible:
+                print("not visible")
+            return visible
         except:
             print("not visible")
             return False
