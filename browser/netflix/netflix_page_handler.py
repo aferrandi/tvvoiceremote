@@ -68,7 +68,7 @@ class NetflixPageHandler(PageHandler):
             print_error("Not watching a movie")
 
     def _button_locator(self, locator: str) -> Locator:
-        return self.page().get_by_role("button").locator(locator)
+        return self.page().locator(locator)
 
     def _start(self) -> None:
         if not self._watching_video():
