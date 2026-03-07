@@ -105,8 +105,12 @@ class NetflixPageHandler(PageHandler):
                 print("Making buttons visible")
                 # '[data-uia="video-canvas"]:scope'
                 video_canvas = self.page().locator("video")
-                if self._is_enabled(video_canvas):
-                    video_canvas.hover()
+                if video_canvas.is_visible() and self._is_enabled(video_canvas):
+                    try:
+                        video_canvas.hover()
+                    except:
+                        print("Problems hovering over video")
+                        pass
                     print("After making buttons visible")
                 else:
                     print("Not possible to make buttons visible")
