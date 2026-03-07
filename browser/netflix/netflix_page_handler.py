@@ -1,4 +1,4 @@
-from playwright.sync_api import Page
+from playwright.sync_api import Page, Locator
 
 from browser.netflix.netflix_movie_finder import NetflixMovieFinder
 from browser.page_handler import PageHandler
@@ -46,8 +46,7 @@ class NetflixPageHandler(PageHandler):
     def _wait(self) -> None:
         if self._watching_video():
             print("Pause movie")
-            self._make_buttons_visible()
-            self.page().get_by_role("button").locator('[data-uia="control-play-pause-pause"]:scope').click()
+            self._make_button_visible_and_click('[data-uia="control-play-pause-pause"]:scope')
             print_correct("Movie paused")
         else:
             print_error("Not watching a movie")
@@ -55,8 +54,7 @@ class NetflixPageHandler(PageHandler):
     def _play(self) -> None:
         if self._watching_video():
             print("Play movie")
-            self._make_buttons_visible()
-            self.page().get_by_role("button").locator('[data-uia="control-play-pause-play"]:scope').click()
+            self._make_button_visible_and_click('[data-uia="control-play-pause-play"]:scope')
             print_correct("Movie played")
         else:
             print_error("Not watching a movie")
@@ -64,11 +62,13 @@ class NetflixPageHandler(PageHandler):
     def _stop(self) -> None:
         if self._watching_video():
             print("Stop movie")
-            self._make_buttons_visible()
-            self.page().get_by_role("button").locator('[data-uia="control-nav-back"]:scope').click()
+            self._make_button_visible_and_click('[data-uia="control-nav-back"]:scope')
             print_correct("Movie stopped")
         else:
             print_error("Not watching a movie")
+
+    def _button_locator(self, locator: str) -> Locator:
+        return self.page().get_by_role("button").locator(locator)
 
     def _start(self) -> None:
         if not self._watching_video():
@@ -87,16 +87,21 @@ class NetflixPageHandler(PageHandler):
         else:
             print_error("Please stop the movie first")
 
-    def _make_buttons_visible(self) -> None:
+    def _make_button_visible_and_click(self, locator: str) -> None:
         if self._watching_video():
-            self.page().locator("video").hover()
+            while not self._button_locator(locator).is_visible():
+                print("Making buttons visible")
+                self.page().locator("video").hover()
+                print("After making buttons visible")
+            print("Clicking button")
+            self._button_locator(locator).click()
+            print("Button clicked")
 
     def _watching_video(self) -> bool:
         return self.page().locator("video").count() > 0
 
     def _back(self) -> None:
-        self._make_buttons_visible()
-        self.page().get_by_role("button").locator('[data-uia="control-navigate-back"]:scope').click()
+        self._make_button_visible_and_click('[data-uia="control-navigate-back"]:scope')
         print_correct("Navigated back")
 
     def _down(self):
