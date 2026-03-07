@@ -104,7 +104,7 @@ class NetflixPageHandler(PageHandler):
             else:
                 print("Making buttons visible")
                 # '[data-uia="video-canvas"]:scope'
-                self.page().mouse.move(100+i, 100+i)
+                self.page().mouse.move(100+i*20, 100+i*20)
         return False
 
 
