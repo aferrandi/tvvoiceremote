@@ -25,10 +25,10 @@ class NetflixPageHandler(PageHandler):
                     self._play()
                 case "wait":
                     self._wait()
-                case "back":
-                    self._back()
                 case "down":
                     self._down()
+                case "skip":
+                    self._skip()
                 case "up":
                     self._up()
                 case _:
@@ -47,7 +47,6 @@ class NetflixPageHandler(PageHandler):
         if self._watching_video():
             print("Pause movie")
             self.page().keyboard.press(" ")
-            #self._make_button_visible_and_click('[data-uia="control-play-pause-pause"]:scope')
             print_correct("Movie paused")
         else:
             print_error("Not watching a movie")
@@ -56,10 +55,18 @@ class NetflixPageHandler(PageHandler):
         if self._watching_video():
             print("Play movie")
             self.page().keyboard.press(" ")
-            #self._make_button_visible_and_click('[data-uia="control-play-pause-play"]:scope')
             print_correct("Movie played")
         else:
             print_error("Not watching a movie")
+
+    def _skip(self) -> None:
+        if self._watching_video():
+            print("Skip introduction")
+            self.page().keyboard.press("S")
+            print_correct("Introduction skipped")
+        else:
+            print_error("Not watching a movie")
+
 
     def _stop(self) -> None:
         if self._watching_video():
@@ -89,55 +96,10 @@ class NetflixPageHandler(PageHandler):
         else:
             print_error("Please stop the movie first")
 
-    def _make_button_visible_and_click(self, locator: str) -> None:
-        if self._watching_video():
-            if self._until_button_is_visible(locator):
-                print("Clicking button")
-                self._button_locator(locator).click()
-                print("Button clicked")
-            else:
-                print_error("Not possible to click button")
-
-    def _until_button_is_visible(self, locator: str) -> bool:
-        for i in range(0, 30):
-            button = self._button_locator(locator)
-            if self._is_enabled(button):
-                print("Making buttons visible")
-                return True
-            else:
-                print("Making buttons visible")
-                # '[data-uia="video-canvas"]:scope'
-                self.page().mouse.move(100+i*20, 100+i*20)
-        return False
-
-
-    def _is_enabled(self, locator: Locator) -> bool:
-        try:
-            enabled = locator.is_enabled(timeout=300)
-            if not enabled:
-                print("Not enabled")
-            return enabled
-        except Exception as ex:
-            print(f"not enabled error {ex}")
-            return False
-
-    def _is_visible(self, locator: Locator) -> bool:
-        try:
-            visible = locator.is_visible(timeout=300)
-            if not visible:
-                print("not visible")
-            return visible
-        except Exception as ex:
-            print(f"not visible error {ex}")
-            return False
 
 
     def _watching_video(self) -> bool:
         return self.page().locator("video").count() > 0
-
-    def _back(self) -> None:
-        self.page().keyboard.press("Escape")
-        print_correct("Navigated back")
 
     def _down(self):
         if not self._watching_video():
