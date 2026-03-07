@@ -112,7 +112,16 @@ class NetflixPageHandler(PageHandler):
         try:
             return locator.is_enabled(timeout=300)
         except:
+            print("not enabled")
             return False
+
+    def _is_visible(self, locator: Locator) -> bool:
+        try:
+            return locator.is_visible(timeout=300)
+        except:
+            print("not visible")
+            return False
+
 
     def _watching_video(self) -> bool:
         return self.page().locator("video").count() > 0
