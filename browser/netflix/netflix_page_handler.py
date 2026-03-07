@@ -115,8 +115,8 @@ class NetflixPageHandler(PageHandler):
             if not enabled:
                 print("Not enabled")
             return enabled
-        except:
-            print("not enabled error")
+        except Exception as ex:
+            print(f"not enabled error {ex}")
             return False
 
     def _is_visible(self, locator: Locator) -> bool:
@@ -125,8 +125,8 @@ class NetflixPageHandler(PageHandler):
             if not visible:
                 print("not visible")
             return visible
-        except:
-            print("not visible error")
+        except Exception as ex:
+            print(f"not visible error {ex}")
             return False
 
 
