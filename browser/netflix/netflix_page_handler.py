@@ -68,7 +68,7 @@ class NetflixPageHandler(PageHandler):
             print_error("Not watching a movie")
 
     def _button_locator(self, locator: str) -> Locator:
-        return self.page().locator(locator)
+        return self.page().get_by_role("button").locator(locator)
 
     def _start(self) -> None:
         if not self._watching_video():
@@ -99,7 +99,7 @@ class NetflixPageHandler(PageHandler):
     def _until_button_is_visible(self, locator: str) -> bool:
         for i in range(0, 30):
             button = self._button_locator(locator)
-            if self._is_visible(button) and self._is_enabled(button):
+            if self._is_enabled(button):
                 print("Making buttons visible")
                 return True
             else:
