@@ -99,7 +99,8 @@ class NetflixPageHandler(PageHandler):
     def _until_button_is_visible(self, locator: str) -> bool:
         for i in range(0, 30):
             button = self._button_locator(locator)
-            if button.is_visible() and self._is_enabled(button):
+            if self._is_visible(button) and self._is_enabled(button):
+                print("Making buttons visible")
                 return True
             else:
                 print("Making buttons visible")
@@ -115,7 +116,7 @@ class NetflixPageHandler(PageHandler):
                 print("Not enabled")
             return enabled
         except:
-            print("not enabled")
+            print("not enabled error")
             return False
 
     def _is_visible(self, locator: Locator) -> bool:
@@ -125,7 +126,7 @@ class NetflixPageHandler(PageHandler):
                 print("not visible")
             return visible
         except:
-            print("not visible")
+            print("not visible error")
             return False
 
 
