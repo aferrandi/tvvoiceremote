@@ -90,7 +90,18 @@ class NetflixPageHandler(PageHandler):
     def _make_button_visible_and_click(self, locator: str) -> None:
         if self._watching_video():
             button = self._button_locator(locator)
-            while not button.is_visible() and not self._is_enabled(button):
+            if self._until_button_is_visible(button):
+                print("Clicking button")
+                button.click()
+                print("Button clicked")
+            else:
+                print_error("Not possible to click button")
+
+    def _until_button_is_visible(self, button: Locator) -> bool:
+        for i in range(0, 30):
+            if button.is_visible() and self._is_enabled(button):
+                return True
+            else:
                 print("Making buttons visible")
                 # '[data-uia="video-canvas"]:scope'
                 video_canvas = self.page().locator("video")
@@ -99,9 +110,8 @@ class NetflixPageHandler(PageHandler):
                     print("After making buttons visible")
                 else:
                     print("Not possible to make buttons visible")
-            print("Clicking button")
-            button.click()
-            print("Button clicked")
+        return False
+
 
     def _is_enabled(self, locator: Locator) -> bool:
         try:
