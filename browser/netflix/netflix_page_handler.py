@@ -134,7 +134,7 @@ class NetflixPageHandler(PageHandler):
         return self.page().locator("video").count() > 0
 
     def _back(self) -> None:
-        self._make_button_visible_and_click('[data-uia="control-navigate-back"]')
+        self.page().keyboard.press("Escape")
         print_correct("Navigated back")
 
     def _down(self):
