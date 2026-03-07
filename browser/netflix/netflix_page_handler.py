@@ -64,7 +64,7 @@ class NetflixPageHandler(PageHandler):
     def _stop(self) -> None:
         if self._watching_video():
             print("Stop movie")
-            self._make_button_visible_and_click('[data-uia="control-nav-back"]:scope')
+            self.page().go_back()
             print_correct("Movie stopped")
         else:
             print_error("Not watching a movie")
