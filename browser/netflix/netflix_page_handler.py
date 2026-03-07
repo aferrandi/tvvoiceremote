@@ -90,15 +90,21 @@ class NetflixPageHandler(PageHandler):
     def _make_button_visible_and_click(self, locator: str) -> None:
         if self._watching_video():
             button = self._button_locator(locator)
-            while not button.is_visible() and not button.is_enabled(timeout=100):
+            while not button.is_visible() and not self._is_enabled(button):
                 print("Making buttons visible")
                 video_canvas = self.page().locator('[data-uia="video-canvas"]:scope')
-                if video_canvas.is_enabled(timeout=100):
+                if self._is_enabled(video_canvas):
                     video_canvas.hover()
                 print("After making buttons visible")
             print("Clicking button")
             button.click()
             print("Button clicked")
+
+    def _is_enabled(self, locator: Locator) -> bool:
+        try:
+            return locator.is_enabled(timeout=100)
+        except:
+            return False
 
     def _watching_video(self) -> bool:
         return self.page().locator("video").count() > 0
