@@ -9,7 +9,7 @@ from vosk import KaldiRecognizer
 from browser.browser_builder import BrowserBuilder
 from browser.browser_handler import BrowserHandler
 from command.command_handler import CommandHandler
-from config_reader import Config
+from browser.config.config_reader import Config
 from utils.sounds import print_error
 from utils.text_utils import TextUtils
 

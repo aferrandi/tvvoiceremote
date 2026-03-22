@@ -3,7 +3,7 @@
 
 import queue
 
-from config_reader import read_config
+from browser.config.config_reader import read_config
 from microphone.microphone_init import init_recognizer
 from microphone.microphone_loop import recording_loop
 

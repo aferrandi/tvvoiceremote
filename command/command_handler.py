@@ -1,6 +1,6 @@
 import subprocess
 
-from config_reader import Config
+from browser.config.config_reader import Config
 from utils.sounds import print_error, print_correct
 
 

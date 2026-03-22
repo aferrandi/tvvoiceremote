@@ -5,7 +5,7 @@ from typing import Optional
 from playwright.sync_api import sync_playwright, Browser
 
 from browser.browser_handler import BrowserHandler
-from config_reader import Config
+from browser.config.config_reader import Config
 from utils.sounds import print_error
 
 

@@ -1,13 +1,12 @@
 import queue
 import sys
-import time
 from typing import Any
 
 import sounddevice as sd
 from _cffi_backend import buffer
 from vosk import KaldiRecognizer
 
-from config_reader import Config
+from browser.config.config_reader import Config
 from microphone.microphone_handler import MicrophoneHandler
 
 

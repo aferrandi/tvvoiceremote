@@ -8,6 +8,11 @@ class Site:
     url: str
 
 @dataclass(frozen=True)
+class YoutubeSite:
+    key: str
+    path: str
+
+@dataclass(frozen=True)
 class Command:
     key: str
     text: str
@@ -25,6 +30,7 @@ class Config:
     auditor_name: str
     minimal_movie_match_probability: float
     sites: list[Site]
+    youtube_sites: list[YoutubeSite]
     text_replacements: list[TextReplacement]
     commands: list[Command]
 
