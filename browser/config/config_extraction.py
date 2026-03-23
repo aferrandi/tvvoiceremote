@@ -4,7 +4,7 @@ from browser.config.config_reader import Config, YoutubeSite, Site
 
 
 class ConfigExtraction:
-    def __init__(Browser, config: Config) -> None:
+    def __init__(self, config: Config) -> None:
        self._config = config
 
     def extract_site_defintion_from_key(self, key: str) -> Optional[Site]:
