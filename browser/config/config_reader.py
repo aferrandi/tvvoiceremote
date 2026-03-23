@@ -38,6 +38,7 @@ def read_config() -> Config:
     with open("config.toml", "rb") as f:
         data = tomllib.load(f)
         data["sites"] = [Site(**s) for s in data["sites"]]
+        data["youtube_sites"] = [YoutubeSite(**s) for s in data["youtube_sites"]]
         data["text_replacements"] = [TextReplacement(**s) for s in data["text_replacements"]]
         data["commands"] = [Command(**s) for s in data["commands"]]
         config = Config(**data)
