@@ -28,7 +28,7 @@ class YoutubePageHandler(PageHandler):
                 case _:
                     self._youtube_movie(title)
         else:
-            print_error(f"The page is not netflix but {self.page().title()}")
+            print_error(f"The page is not youtube but {self.page().title()}")
 
     def _youtube_movie(self, title: str) -> None:
         if not self._watching_video():

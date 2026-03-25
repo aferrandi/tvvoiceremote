@@ -48,7 +48,7 @@ class BrowserHandler:
         match web_page_key:
             case "netflix":
                 return "https://www.netflix.com"
-            case "youtube":
+            case "tube":
                 definition = extraction.extract_youtube_site_defintion_from_key(web_page_key)
                 return f"https://www.youtube.com/{definition.path}" if definition is not None else None
             case _:
