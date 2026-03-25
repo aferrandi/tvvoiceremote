@@ -38,7 +38,7 @@ class BrowserHandler:
         match page_type:
             case "netflix":
                 return NetflixPageHandler(page, self._config)
-            case "youtube":
+            case "tube":
                 return YoutubePageHandler(page, self._config)
             case _:
                 return None
