@@ -2,6 +2,9 @@ microphone_name="Blue Snowball"
 chromium_path="/snap/bin/chromium"
 auditor_name="axel"
 minimal_movie_match_probability=65
+vosk_model_path="vosk-model-small-en-us-0.15"
+
+
 
 [[text_replacements]]
 text_from="net flicks"

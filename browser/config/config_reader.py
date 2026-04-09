@@ -26,6 +26,7 @@ class TextReplacement:
 @dataclass(frozen=True)
 class Config:
     microphone_name: str
+    vosk_model_path: str
     chromium_path: str
     auditor_name: str
     minimal_movie_match_probability: float
