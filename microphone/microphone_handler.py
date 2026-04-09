@@ -42,7 +42,7 @@ class MicrophoneHandler:
             print_error("No command to run")
 
     def _do_something_with_netflix(self, command_words: list[str]):
-        if self._browser_handler is not None and self._browser_handler.is_valid():
+        if MicrophoneHandler._browser_handler_is_valid(self._browser_handler):
             if len(command_words) > 1:
                 self._browser_handler.in_page("netflix", command_words[1:])
             else:
@@ -52,16 +52,23 @@ class MicrophoneHandler:
 
     def _do_something_with_browser(self, command_words: list[str]):
         if len(command_words) > 1:
-            if self._browser_handler is None or not self._browser_handler.is_valid():
+            if not MicrophoneHandler._browser_handler_is_valid(self._browser_handler):
                 self._browser_handler = self._browser_builder.open_browser()
-                print(f"Crated browser handler {self._browser_handler}")
-            match command_words[1]:
-                case "close":
-                    self._browser_handler.close()
-                case _:
-                    self._browser_handler.open_page(command_words[1:])
+                print(f"Created browser handler {self._browser_handler}")
+            if MicrophoneHandler._browser_handler_is_valid(self._browser_handler):
+                match command_words[1]:
+                    case "close":
+                        self._browser_handler.close()
+                    case _:
+                        self._browser_handler.open_page(command_words[1:])
+            else:
+                print("The browser handler is not valid after creation")
         else:
             print_error("Not enough words after browser")
+
+    @staticmethod
+    def _browser_handler_is_valid(browser_handler: Optional[BrowserHandler]) -> bool:
+        return browser_handler is not None and browser_handler.is_valid()
 
     def _do_something_with_command(self, command_words: list[str]):
         if len(command_words) > 1:
