@@ -13,6 +13,7 @@ from microphone.microphone_handler import MicrophoneHandler
 class RecordCallbackHandler:
     def __init__(self, q: queue.Queue[Any]):
         self._q = q
+
     def record_callback(self, indata: buffer, frames: int, time: None, status: sd.CallbackFlags) -> None:
         if status:
             print(status, file=sys.stderr)
