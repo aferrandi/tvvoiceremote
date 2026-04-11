@@ -65,7 +65,7 @@ class YoutubePageHandler(PageHandler):
         return self.page().get_by_role("button").locator(locator)
 
     def _watching_video(self) -> bool:
-        return self.page().locator("video").count() > 0
+        return self.page().locator("div.html5-video-container: has(video)").count() > 0
 
     def _down(self):
         if not self._watching_video():
