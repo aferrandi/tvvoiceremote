@@ -20,41 +20,40 @@ class BrowserHandler:
 
     def open_page(self, web_page_words: list[str]) -> None:
         page_type = web_page_words[0]
-        print(f"Opening page {page_type}")
-        web_page_url = self._extract_web_page(page_type, web_page_words)
-        if web_page_url is not None:
-            print(f"Opening page with url {web_page_url}")
-            default_context = self._browser.contexts[0]
-            page = default_context.pages[0]
-            page.goto(web_page_url)
-            page.set_default_timeout(2000)
-            self._page_handlers[page_type] = self._create_handler(page_type, page)
-            print_correct(f"Opened page with url {web_page_url}")
-        else:
-            print_error(f"Url not found for page {page_type}")
-
-
-    def _create_handler(self, page_type: str, page: Page) -> Optional[PageHandler]:
+        extraction = ConfigExtraction(self._config)
         match page_type:
             case "netflix":
-                return NetflixPageHandler(page, self._config)
+                web_page_url = "https://www.netflix.com"
+                print(f"Opening page with url {web_page_url} in netflix")
+                page = self._open_page_in_browser(web_page_url)
+                self._page_handlers[page_type] = NetflixPageHandler(page, self._config)
+                print_correct(f"Opened page with url {web_page_url}")
             case "tube":
-                return YoutubePageHandler(page, self._config)
+                definition = extraction.extract_youtube_site_defintion_from_key(web_page_words[1])
+                if definition is not None:
+                    web_page_url = f"https://www.youtube.com/{definition.path}"
+                    print(f"Opening page with url {web_page_url} in yoptube")
+                    page = self._open_page_in_browser(web_page_url)
+                    self._page_handlers[page_type] = YoutubePageHandler(page, self._config)
+                    print_correct(f"Opened page with url {web_page_url}")
+                else:
+                    print_error(f"Definition not found for  {page_type}")
             case _:
-                return None
+                definition = extraction.extract_site_defintion_from_key(web_page_words[0])
+                if definition is not None:
+                    web_page_url = definition.url
+                    print(f"Opening page with url {web_page_url} as simple site")
+                    page = self._open_page_in_browser(web_page_url)
+                    print_correct(f"Opened page with url {web_page_url}")
+                else:
+                    print_error(f"Definition not found for  {page_type}")
 
-    def _extract_web_page(self, web_page_key: str, wbe_page_additional_infos: list[str]) -> Optional[str]:
-        extraction = ConfigExtraction(self._config)
-        match web_page_key:
-            case "netflix":
-                return "https://www.netflix.com"
-            case "tube":
-                definition = extraction.extract_youtube_site_defintion_from_key(wbe_page_additional_infos[0])
-                return f"https://www.youtube.com/{definition.path}" if definition is not None else None
-            case _:
-                definition = extraction.extract_site_defintion_from_key(web_page_key)
-                return definition.url if definition is not None else None
-
+    def _open_page_in_browser(self, web_page_url: str) -> Page:
+        default_context = self._browser.contexts[0]
+        page = default_context.pages[0]
+        page.goto(web_page_url)
+        page.set_default_timeout(2000)
+        return page
 
     def in_page(self, page_type: str, action: list[str]) -> None:
         page_handler = self._page_handlers.get(page_type)

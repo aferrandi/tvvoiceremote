@@ -31,6 +31,8 @@ class MicrophoneHandler:
                         self._do_something_with_command(command_words)
                     case "netflix":
                         self._do_something_with_netflix(command_words)
+                    case "tube":
+                        self._do_something_with_youtube(command_words)
                     case _:
                         print_error(f"Command {command_words} not recognized")
             except TargetClosedError:
@@ -47,6 +49,15 @@ class MicrophoneHandler:
                 self._browser_handler.in_page("netflix", command_words[1:])
             else:
                 print_error("Not enough words after netflix")
+        else:
+            print_error("No open browser")
+
+    def _do_something_with_youtube(self, command_words: list[str]):
+        if MicrophoneHandler._browser_handler_is_valid(self._browser_handler):
+            if len(command_words) > 1:
+                self._browser_handler.in_page("tube", command_words[1:])
+            else:
+                print_error("Not enough words after tube")
         else:
             print_error("No open browser")
 
